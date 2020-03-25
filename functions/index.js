@@ -15,7 +15,7 @@ const MAX_RESULTS = 30;
 const MAPS_ENABLED = false;
 const MINIMUM_NOTIFICATION_DELAY = 20;
 const SEND_EMAILS = sgMailApiKey !== null;
-const sendingMailsDisabledLogMessage = 'Sending emails is currently disabled.'
+const sendingMailsDisabledLogMessage = 'Sending emails is currently disabled.';
 
 exports.offerHelpCreate = functions.region('europe-west1').firestore.document('/ask-for-help/{requestId}/offer-help/{offerId}')
   .onCreate(async (snap, context) => {
@@ -41,7 +41,7 @@ exports.offerHelpCreate = functions.region('europe-west1').firestore.document('/
         from: email,
         templateId: 'd-ed9746e4ff064676b7df121c81037fab',
         dynamic_template_data: {
-          subject: 'QuarantäneHelden - Jemand hat dir geschrieben!',
+          subject: 'WirAlle RBL - Jemand hat dir geschrieben!',
           answer,
           email,
           request,
@@ -51,13 +51,13 @@ exports.offerHelpCreate = functions.region('europe-west1').firestore.document('/
         if (SEND_EMAILS) {
           await sgMail.send({
             to: receiver,
-            from: 'help@quarantaenehelden.org',
+            from: 'help@wiralle-rbl.com',
             replyTo: {
               email: email,
             },
             templateId: 'd-ed9746e4ff064676b7df121c81037fab',
             dynamic_template_data: {
-              subject: 'QuarantäneHelden - Jemand hat dir geschrieben!',
+              subject: 'WirAlle RBL - Jemand hat dir geschrieben!',
               answer,
               email,
               request,
@@ -86,7 +86,7 @@ exports.offerHelpCreate = functions.region('europe-west1').firestore.document('/
     }
   });
 
-exports.sendNotificationEmails = functions.pubsub.schedule('every 3 minutes').onRun(async (context) => {
+exports.sendNotificationEmails = functions.region('europe-west1').pubsub.schedule('every 3 minutes').onRun(async (context) => {
   const dist = (search, doc) => {
     return Math.abs(Number(search) - Number(doc.plz));
   };
@@ -145,13 +145,13 @@ exports.sendNotificationEmails = functions.pubsub.schedule('every 3 minutes').on
         const { email } = offeringUser.toJSON();
         await sgMail.send({
           to: email,
-          from: 'help@quarantaenehelden.org',
+          from: 'help@wiralle-rbl.com',
           templateId: 'd-9e0d0ec8eda04c9a98e6cb1edffdac71',
           dynamic_template_data: {
-            subject: 'QuarantäneHelden - Jemand braucht deine Hilfe!',
+            subject: 'WirAlle RBL - Jemand braucht deine Hilfe!',
             request: askForHelpSnapData.d.request,
             location: askForHelpSnapData.d.location,
-            link: 'https://www.quarantaenehelden.org/#/offer-help/' + askForHelpId,
+            link: 'https://www.wiralle-rbl.com/#/offer-help/' + askForHelpId,
           },
           hideWarnings: true, // removes triple bracket warning
         });
