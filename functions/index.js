@@ -1,4 +1,3 @@
-const slack = require('./slack');
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
@@ -218,8 +217,6 @@ exports.askForHelpCreate = functions.region('europe-west1').firestore.document('
       await db.collection('/stats').doc('external').update({
         askForHelp: admin.firestore.FieldValue.increment(1),
       });
-
-      await slack.postToSlack(askForHelpId, askForHelpSnapData);
 
     } catch (e) {
       console.error(e);
