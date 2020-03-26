@@ -4,10 +4,10 @@ admin.initializeApp();
 const sgMail = require('@sendgrid/mail');
 const { GeoCollectionReference } = require('geofirestore');
 
-const envVariables = functions.config()
+const envVariables = functions.config();
 const sgMailApiKey = envVariables && envVariables.sendgrid && envVariables.sendgrid.key
    ? envVariables.sendgrid.key
-   : null
+   : null;
 sgMail.setApiKey(sgMailApiKey);
 
 const MAX_RESULTS = 30;
