@@ -57,7 +57,11 @@ Deine Helferin / dein Helfer lässt dir folgende Nachricht zukommen:
 "${answer}"
 
 Du kannst deiner Helferin / deinem Helfer nun unter folgender E-Mail Adresse antworten:
-${email}`,
+${email}
+
+Vielen Dank!
+
+Das WirAlle-RBL-Team`,
           });
         } else {
           console.log(sendingMailsDisabledLogMessage);
@@ -160,7 +164,11 @@ Sie / er wohnt in ${askForHelpSnapData.d.location} und hat folgendes geschrieben
 "${askForHelpSnapData.d.request}"
 
 Du kannst auf die Anfrage unter folgendem Link antworten:
-${'https://www.wiralle-rbl.com/#/offer-help/' + askForHelpId}`,
+${'https://www.wiralle-rbl.com/#/offer-help/' + askForHelpId}
+
+Vielen Dank!
+
+Das WirAlle-RBL-Team`,
         });
 
         await db.collection(`/ask-for-help`).doc(askForHelpId).update({
