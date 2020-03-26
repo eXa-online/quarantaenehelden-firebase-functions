@@ -12,7 +12,7 @@ sgMail.setApiKey(sgMailApiKey);
 
 const MAX_RESULTS = 30;
 const MAPS_ENABLED = false;
-const MINIMUM_NOTIFICATION_DELAY = 20;
+const MINIMUM_NOTIFICATION_DELAY = 20; // minutes
 const SEND_EMAILS = sgMailApiKey !== null;
 const sendingMailsDisabledLogMessage = 'Sending emails is currently disabled.';
 
@@ -38,30 +38,26 @@ exports.offerHelpCreate = functions.region('europe-west1').firestore.document('/
       console.log({
         to: receiver,
         from: email,
-        templateId: 'd-ed9746e4ff064676b7df121c81037fab',
-        dynamic_template_data: {
-          subject: 'WirAlle RBL - Jemand hat dir geschrieben!',
-          answer,
-          email,
-          request,
-        },
+        subject: 'WirAlle RBL - Jemand hat dir geschrieben!',
+        answer: answer,
+        email: email,
+        request: request,
       });
       try {
         if (SEND_EMAILS) {
           await sgMail.send({
             to: receiver,
             from: 'help@wiralle-rbl.com',
-            replyTo: {
-              email: email,
-            },
-            templateId: 'd-ed9746e4ff064676b7df121c81037fab',
-            dynamic_template_data: {
-              subject: 'WirAlle RBL - Jemand hat dir geschrieben!',
-              answer,
-              email,
-              request,
-            },
-            hideWarnings: true, // removes triple bracket warning
+            subject: 'WirAlle RBL - Jemand hat dir geschrieben!',
+            text: `Hallo,
+jemand hat sich sich auf die folgende Anfrage von dir gemeldet:
+"${request}"
+
+Deine Helferin / dein Helfer lässt dir folgende Nachricht zukommen:
+"${answer}"
+
+Du kannst deiner Helferin / deinem Helfer nun unter folgender E-Mail Adresse antworten:
+${email}`,
           });
         } else {
           console.log(sendingMailsDisabledLogMessage);
@@ -137,22 +133,34 @@ exports.sendNotificationEmails = functions.region('europe-west1').pubsub.schedul
   };
 
   const sendNotificationEmails = async (eligibleHelpOffers, askForHelpSnapData, askForHelpId) => {
+    console.log("Calling sendNotificationEmails");
     const result = await Promise.all(eligibleHelpOffers.map(async offerDoc => {
       try {
         const { uid } = offerDoc;
         const offeringUser = await admin.auth().getUser(uid);
         const { email } = offeringUser.toJSON();
+        console.log({
+          to: email,
+          from: 'help@wiralle-rbl.com',
+          subject: 'WirAlle RBL - Jemand braucht deine Hilfe!',
+          text: `Hallo,
+jemand aus deiner Region benötigt deine Hilfe! Sie / er wohnt in ${askForHelpSnapData.d.location} und hat folgendes geschrieben: 
+"${askForHelpSnapData.d.request}"
+
+Du kannst auf die Anfrage unter folgendem Link antworten:
+${'https://www.wiralle-rbl.com/#/offer-help/' + askForHelpId}`,
+        });
         await sgMail.send({
           to: email,
           from: 'help@wiralle-rbl.com',
-          templateId: 'd-9e0d0ec8eda04c9a98e6cb1edffdac71',
-          dynamic_template_data: {
-            subject: 'WirAlle RBL - Jemand braucht deine Hilfe!',
-            request: askForHelpSnapData.d.request,
-            location: askForHelpSnapData.d.location,
-            link: 'https://www.wiralle-rbl.com/#/offer-help/' + askForHelpId,
-          },
-          hideWarnings: true, // removes triple bracket warning
+          subject: 'WirAlle RBL - Jemand braucht deine Hilfe!',
+          text: `Hallo,
+jemand aus deiner Region benötigt deine Hilfe!
+Sie / er wohnt in ${askForHelpSnapData.d.location} und hat folgendes geschrieben: 
+"${askForHelpSnapData.d.request}"
+
+Du kannst auf die Anfrage unter folgendem Link antworten:
+${'https://www.wiralle-rbl.com/#/offer-help/' + askForHelpId}`,
         });
 
         await db.collection(`/ask-for-help`).doc(askForHelpId).update({
